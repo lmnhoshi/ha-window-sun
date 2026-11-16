@@ -15,7 +15,14 @@ from homeassistant.helpers.event import async_track_point_in_utc_time
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator
 from homeassistant.util import dt as dt_util
 
-from .const import CONF_AZIMUTH, DOMAIN
+from .const import (
+    CONF_AZIMUTH,
+    CONF_MAX_ANGLE,
+    CONF_MIN_ANGLE,
+    DEFAULT_MAX_ANGLE,
+    DEFAULT_MIN_ANGLE,
+    DOMAIN,
+)
 from .solar import Interval, day_bounds, sun_intervals, total
 
 _LOGGER = logging.getLogger(__name__)
@@ -80,6 +87,15 @@ class WindowSunCoordinator(DataUpdateCoordinator[WindowSunData]):
     def azimuth(self) -> float:
         return float(self.config_entry.options[CONF_AZIMUTH])
 
+    @property
+    def angle_range(self) -> tuple[float, float]:
+        """Allowed sun angles from the wall; entries made by 0.1.0 have none."""
+        options = self.config_entry.options
+        return (
+            float(options.get(CONF_MIN_ANGLE, DEFAULT_MIN_ANGLE)),
+            float(options.get(CONF_MAX_ANGLE, DEFAULT_MAX_ANGLE)),
+        )
+
     @callback
     def _config_updated(self, _event: Event) -> None:
         self.hass.async_create_task(self.async_refresh())
@@ -98,8 +114,9 @@ class WindowSunCoordinator(DataUpdateCoordinator[WindowSunData]):
         today = local_now.date()
         tomorrow = today + timedelta(days=1)
 
-        today_iv = sun_intervals(observer, today, tz, self.azimuth)
-        tomorrow_iv = sun_intervals(observer, tomorrow, tz, self.azimuth)
+        angles = self.angle_range
+        today_iv = sun_intervals(observer, today, tz, self.azimuth, *angles)
+        tomorrow_iv = sun_intervals(observer, tomorrow, tz, self.azimuth, *angles)
         is_today, shown = choose_day(now, today_iv, tomorrow_iv)
         in_sun = any(start <= now < end for start, end in today_iv)
         data = WindowSunData(

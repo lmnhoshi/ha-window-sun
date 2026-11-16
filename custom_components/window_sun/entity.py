@@ -42,6 +42,8 @@ class WindowSunEntity(CoordinatorEntity[WindowSunCoordinator]):
         return {
             "azimuth": azimuth,
             "facing": compass_point(azimuth),
+            "min_angle": self.coordinator.angle_range[0],
+            "max_angle": self.coordinator.angle_range[1],
             "floor": int(options[CONF_FLOOR]),
             "ground_floor_number": int(options[CONF_GROUND_FLOOR]),
             "storeys_above_ground": storeys_above_ground(options),

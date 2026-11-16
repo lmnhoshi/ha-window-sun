@@ -8,7 +8,12 @@ from astral.sun import sun
 import pytest
 
 from custom_components.window_sun.const import compass_point
-from custom_components.window_sun.solar import facing_offset, sun_intervals, total
+from custom_components.window_sun.solar import (
+    facing_offset,
+    sun_intervals,
+    total,
+    wall_angle,
+)
 
 OBS = Observer(44.84, -0.58, 0)
 TZ = ZoneInfo("Europe/Paris")
@@ -66,8 +71,26 @@ def test_dst_day_times_are_local():
     assert ref["sunset"] - timedelta(hours=1) < end < ref["sunset"]
 
 
-def test_margin_is_the_1_to_179_rule():
-    """With a 0° margin an east window would get a little more sun."""
+def test_wall_angle_scale():
+    """Looking out of a south window: east is on the left, west on the right."""
+    assert wall_angle(90, 180) == 0
+    assert wall_angle(180, 180) == 90
+    assert wall_angle(270, 180) == 180
+    assert not 0 <= wall_angle(0, 180) <= 180
+    assert wall_angle(10, 350) == 110
+
+
+def test_default_range_is_the_1_to_179_rule():
+    """0°–180° gives an east window a little more sun than 1°–179°."""
     strict = total(sun_intervals(OBS, SUMMER, TZ, 90))
-    loose = total(sun_intervals(OBS, SUMMER, TZ, 90, margin=0))
+    loose = total(sun_intervals(OBS, SUMMER, TZ, 90, 0, 180))
     assert timedelta(0) < loose - strict < timedelta(minutes=10)
+
+
+def test_narrow_range_cuts_one_side():
+    """South window in winter, right side blocked from 135°: sun ends earlier."""
+    (start, end), = sun_intervals(OBS, WINTER, TZ, 180)
+    (cut_start, cut_end), = sun_intervals(OBS, WINTER, TZ, 180, 1, 135)
+    assert cut_start == start
+    # Sun at azimuth 180 + 45 = 225°: about 16:20 in December, before sunset.
+    assert cut_end.hour == 16 and cut_end < end

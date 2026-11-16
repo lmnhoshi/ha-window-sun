@@ -4,9 +4,11 @@ A window facing azimuth A (degrees clockwise from north) is in the sun when
   * the sun is up, using the same definition as the Sun integration's
     sunrise and sunset (geometric elevation above -0.833°: the top of the
     disc, with standard atmospheric refraction), and
-  * the sun is in front of the wall: its azimuth is at most 90° - margin away
-    from A. With the default 1° margin this is "between 1° and 179° from the
-    wall plane".
+  * the sun is in front of the wall, within the window's angle range: its
+    angle from the wall plane, looking out, is between min_angle and
+    max_angle (0° = along the wall to the left, 90° = straight ahead,
+    180° = along the wall to the right). The default 1°–179° leaves out the
+    sun skimming along the façade.
 
 There are no obstacles: neighbouring buildings, trees, balconies and window
 reveals are ignored, so the result is the potential (maximum) sun time.
@@ -20,7 +22,7 @@ from datetime import date, datetime, time, timedelta, tzinfo
 from astral import Observer
 from astral.sun import azimuth as sun_azimuth, elevation as sun_elevation
 
-from .const import EDGE_MARGIN
+from .const import DEFAULT_MAX_ANGLE, DEFAULT_MIN_ANGLE
 
 SUNRISE_ELEVATION = -0.833
 
@@ -35,13 +37,25 @@ def facing_offset(sun_az: float, window_az: float) -> float:
     return abs((sun_az - window_az + 180.0) % 360.0 - 180.0)
 
 
+def wall_angle(sun_az: float, window_az: float) -> float:
+    """Sun's angle from the wall plane, looking out: 0 left, 90 ahead, 180 right.
+
+    Behind the wall the result is outside 0..180 (negative or above 180).
+    """
+    return (sun_az - window_az + 180.0) % 360.0 - 90.0
+
+
 def sun_on_window(
-    observer: Observer, when: datetime, window_az: float, margin: float = EDGE_MARGIN
+    observer: Observer,
+    when: datetime,
+    window_az: float,
+    min_angle: float = DEFAULT_MIN_ANGLE,
+    max_angle: float = DEFAULT_MAX_ANGLE,
 ) -> bool:
     """Return True if the sun hits the window at this instant."""
     if sun_elevation(observer, when, with_refraction=False) <= SUNRISE_ELEVATION:
         return False
-    return facing_offset(sun_azimuth(observer, when), window_az) <= 90.0 - margin
+    return min_angle <= wall_angle(sun_azimuth(observer, when), window_az) <= max_angle
 
 
 def _edge(lit: Callable[[datetime], bool], low: datetime, high: datetime) -> datetime:
@@ -68,7 +82,8 @@ def sun_intervals(
     day: date,
     tz: tzinfo,
     window_az: float,
-    margin: float = EDGE_MARGIN,
+    min_angle: float = DEFAULT_MIN_ANGLE,
+    max_angle: float = DEFAULT_MAX_ANGLE,
 ) -> list[Interval]:
     """Return the periods of a local day when the sun hits the window.
 
@@ -77,7 +92,7 @@ def sun_intervals(
     """
 
     def lit(when: datetime) -> bool:
-        return sun_on_window(observer, when, window_az, margin)
+        return sun_on_window(observer, when, window_az, min_angle, max_angle)
 
     start, end = day_bounds(day, tz)
     intervals: list[Interval] = []

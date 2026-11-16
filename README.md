@@ -12,9 +12,11 @@ The sun hits a window when both of these are true:
 
 1. **The sun is up.** This uses the Sun integration's definition of sunrise and sunset: the top of the disc is
    on the horizon, with standard refraction.
-2. **The sun is in front of the wall.** Its compass direction must be between **1° and 179°** from the
-   wall plane. In other words, it must be at most 89° away from the direction the window faces.
-   The 1° edges leave out the sun skimming along the façade.
+2. **The sun is in front of the wall, within the window's angle range.** The angle is measured
+   from the wall as you look out. 0° is along the wall to your left, 90° is straight ahead,
+   and 180° is along the wall to your right. The default range is **1° to 179°**, which leaves out
+   the sun skimming along the façade. You can set each window's range yourself: see
+   [Minimum and maximum angle](#minimum-and-maximum-angle).
 
 **Obstacles are not taken into account.** Neighbouring buildings, trees, balconies, overhangs
 and the window reveal are all ignored. The result is the *potential* sun time, an upper bound.
@@ -32,10 +34,33 @@ Go to **Settings → Devices & services → Add integration → Window Sun**. Ad
 |---|---|
 | Name | For example *Bedroom window*. Entities are named after it. |
 | Orientation | The compass direction the window faces when you look out: 0 north, 90 east, 180 south, 270 west. Decimals are allowed. |
+| Minimum angle from the wall | The lowest sun angle that still reaches the glass. Default 1°. |
+| Maximum angle from the wall | The highest sun angle that still reaches the glass. Default 179°. |
 | Floor | The floor the window is on, numbered the local way. |
 | Ground floor number | **0**: the ground floor is 0, as in most of Europe. **1**: the ground floor is 1, as in North America. |
 
-The orientation and floor can be changed later with **Configure**.
+The orientation, the angles and the floor can be changed later with **Configure**.
+
+### Minimum and maximum angle
+
+Stand at the window and look out:
+
+```
+      left wall side                    right wall side
+  0° ───────────────────── window ───────────────────── 180°
+                  ╲          90°          ╱
+                    ╲    straight ahead ╱
+```
+
+The sun reaches the glass only while its angle is between the minimum and the maximum.
+Narrow the range when something always blocks one side, for example:
+
+- **A deep reveal, or a side wall of a loggia.** On a window that faces 143°, with the sun
+  blocked once it is less than 30° from the wall on the right, set the maximum to **150°**.
+- **A building wing beside the window**, blocking the left side: raise the minimum.
+
+The angles are horizontal directions only. They can't model obstacles that block the low sun
+but not the high sun, such as a building in front.
 
 The floor does **not** change the result yet, because no obstacles are modelled. With no obstacles
 the sky is equally open on every floor. The floor is kept as attributes so that dashboards can use it,
@@ -56,7 +81,8 @@ and so that a future obstacle or horizon model can use it.
 The sun-hours sensor has these attributes:
 - `day` and `date`.
 - `periods`, a list of `{start, end}`.
-- `azimuth`, `facing` (for example `SE`), `floor`, `ground_floor_number` and `storeys_above_ground`.
+- `azimuth`, `facing` (for example `SE`), `min_angle`, `max_angle`, `floor`, `ground_floor_number`
+  and `storeys_above_ground`.
   `storeys_above_ground` is the floor minus the ground floor number, so floor 3 counts as 2 above
   ground in the "ground floor is 1" convention.
 

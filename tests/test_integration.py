@@ -17,7 +17,7 @@ from homeassistant.data_entry_flow import FlowResultType
 from custom_components.window_sun.const import DOMAIN
 
 TZ = ZoneInfo("Europe/Paris")
-OPTIONS = {"azimuth": 90.0, "floor": 2, "ground_floor": "0"}
+OPTIONS = {"azimuth": 90.0, "floor": 2, "ground_floor": "0"}  # as saved by 0.1.0
 
 
 async def _setup(hass, options=OPTIONS, title="Kitchen") -> MockConfigEntry:
@@ -35,11 +35,21 @@ async def test_config_flow(hass: HomeAssistant, bordeaux) -> None:
     assert result["type"] is FlowResultType.FORM
     result = await hass.config_entries.flow.async_configure(
         result["flow_id"],
-        {"name": "Living room", "azimuth": 1, "floor": 1, "ground_floor": "1"},
+        {"name": "Living room", "azimuth": 1, "min_angle": 120, "max_angle": 20,
+         "floor": 1, "ground_floor": "1"},
+    )
+    assert result["errors"] == {"max_angle": "angle_order"}
+    result = await hass.config_entries.flow.async_configure(
+        result["flow_id"],
+        {"name": "Living room", "azimuth": 1, "min_angle": 1, "max_angle": 179,
+         "floor": 1, "ground_floor": "1"},
     )
     assert result["type"] is FlowResultType.CREATE_ENTRY
     assert result["title"] == "Living room"
-    assert result["options"] == {"azimuth": 1.0, "floor": 1, "ground_floor": "1"}
+    assert result["options"] == {
+        "azimuth": 1.0, "min_angle": 1.0, "max_angle": 179.0,
+        "floor": 1, "ground_floor": "1",
+    }
     await hass.async_block_till_done()
     attrs = hass.states.get("sensor.living_room_sun_hours").attributes
     assert attrs["storeys_above_ground"] == 0 and attrs["facing"] == "N"
@@ -51,7 +61,8 @@ async def test_options_flow_changes_orientation(hass, bordeaux, freezer) -> None
     east = float(hass.states.get("sensor.kitchen_sun_hours").state)
     result = await hass.config_entries.options.async_init(entry.entry_id)
     result = await hass.config_entries.options.async_configure(
-        result["flow_id"], {"azimuth": 0, "floor": 2, "ground_floor": "0"}
+        result["flow_id"],
+        {"azimuth": 0, "min_angle": 1, "max_angle": 179, "floor": 2, "ground_floor": "0"},
     )
     assert result["type"] is FlowResultType.CREATE_ENTRY
     await hass.async_block_till_done()
@@ -107,6 +118,22 @@ async def test_window_without_sun_today_shows_tomorrow(hass, bordeaux, freezer) 
 async def test_floor_conventions(hass, bordeaux, floor, ground, above) -> None:
     await _setup(hass, {"azimuth": 180.0, "floor": floor, "ground_floor": ground}, "W")
     assert hass.states.get("sensor.w_sun_hours").attributes["storeys_above_ground"] == above
+
+
+async def test_angle_range_narrows_the_hours(hass, bordeaux, freezer) -> None:
+    freezer.move_to(datetime(2026, 11, 16, 7, 0, tzinfo=TZ))
+    entry = await _setup(hass)
+    full = float(hass.states.get("sensor.kitchen_sun_hours").state)
+    assert hass.states.get("sensor.kitchen_sun_hours").attributes["max_angle"] == 179
+    result = await hass.config_entries.options.async_init(entry.entry_id)
+    result = await hass.config_entries.options.async_configure(
+        result["flow_id"],
+        {"azimuth": 90, "min_angle": 1, "max_angle": 120, "floor": 2, "ground_floor": "0"},
+    )
+    await hass.async_block_till_done()
+    narrowed = hass.states.get("sensor.kitchen_sun_hours")
+    assert narrowed.attributes["max_angle"] == 120
+    assert 0 < float(narrowed.state) < full
 
 
 async def test_unload(hass, bordeaux) -> None:

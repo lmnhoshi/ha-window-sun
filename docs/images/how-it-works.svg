@@ -1,0 +1,113 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="480" viewBox="0 0 960 480" font-family="Helvetica Neue, Helvetica, Arial, sans-serif">
+  <title>How Window Sun decides when the sun is on a window</title>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0 0 L10 5 L0 10 z" fill="#5B6778"/>
+    </marker>
+    <g id="sun">
+      <circle r="15" fill="#F5B33F"/>
+      <g stroke="#F5B33F" stroke-width="3" stroke-linecap="round">
+        <line x1="0" y1="-21" x2="0" y2="-27"/><line x1="0" y1="21" x2="0" y2="27"/>
+        <line x1="-21" y1="0" x2="-27" y2="0"/><line x1="21" y1="0" x2="27" y2="0"/>
+        <line x1="-15" y1="-15" x2="-19" y2="-19"/><line x1="15" y1="15" x2="19" y2="19"/>
+        <line x1="-15" y1="15" x2="-19" y2="19"/><line x1="15" y1="-15" x2="19" y2="-19"/>
+      </g>
+    </g>
+  </defs>
+
+  <rect x="0" y="0" width="960" height="480" rx="16" fill="#FFFFFF"/>
+  <rect x="0.5" y="0.5" width="959" height="479" rx="16" fill="none" stroke="#D8DEE6"/>
+
+  <!-- ============ Left: seen from above ============ -->
+  <text x="30" y="40" font-size="20" font-weight="700" fill="#1E2A3B">1 · Seen from above</text>
+  <text x="30" y="62" font-size="13" fill="#5B6778">Angles are measured from the wall, looking out of the window.</text>
+
+  <!-- compass: "up" in this drawing is the facing direction, 132° -->
+  <g transform="translate(420 110)">
+    <circle r="24" fill="none" stroke="#D8DEE6" stroke-width="1.5"/>
+    <g transform="rotate(-132)">
+      <path d="M0 -20 L6 2 L0 -3 L-6 2 z" fill="#C0392B"/>
+      <text x="0" y="-26" font-size="12" font-weight="700" fill="#C0392B" text-anchor="middle" transform="rotate(132 0 -30)">N</text>
+    </g>
+  </g>
+
+  <!-- whole half-plane in front of the wall -->
+  <path d="M50 330 A190 190 0 0 1 430 330" fill="none" stroke="#B9C2CE" stroke-width="1.5" stroke-dasharray="5 5"/>
+  <!-- allowed range: min 25°, max 155° -->
+  <path d="M240 330 L67.8 249.7 A190 190 0 0 1 412.2 249.7 Z" fill="#F5B33F" fill-opacity="0.22" stroke="#F2A93B" stroke-width="1.5"/>
+  <text x="96" y="236" font-size="13" font-weight="600" fill="#B7791F" text-anchor="middle">min 25°</text>
+  <text x="384" y="236" font-size="13" font-weight="600" fill="#B7791F" text-anchor="middle">max 155°</text>
+
+  <!-- angle scale -->
+  <text x="44" y="326" font-size="14" font-weight="700" fill="#1E2A3B" text-anchor="end">0°</text>
+  <text x="436" y="326" font-size="14" font-weight="700" fill="#1E2A3B">180°</text>
+  <text x="30" y="362" font-size="11" fill="#5B6778">← left</text>
+  <text x="450" y="362" font-size="11" fill="#5B6778" text-anchor="end">right →</text>
+
+  <!-- facing direction -->
+  <line x1="240" y1="322" x2="240" y2="132" stroke="#5B6778" stroke-width="1.5" stroke-dasharray="4 4" marker-end="url(#arrow)"/>
+  <text x="240" y="118" font-size="13" font-weight="600" fill="#1E2A3B" text-anchor="middle">90° · the window faces 132° (SE)</text>
+
+  <!-- sun in range: θ = 60° -->
+  <line x1="145" y1="165" x2="232" y2="322" stroke="#F2A93B" stroke-width="2" stroke-dasharray="6 4"/>
+  <use href="#sun" x="145" y="165"/>
+  <text x="112" y="160" font-size="13" font-weight="700" fill="#2E7D32" text-anchor="end">✓ on the window</text>
+
+  <!-- sun outside the range: θ = 12° -->
+  <g opacity="0.55"><use href="#sun" x="58" y="290"/></g>
+  <text x="84" y="296" font-size="12" fill="#5B6778">✗ outside range</text>
+
+  <!-- wall with window -->
+  <rect x="30" y="330" width="170" height="16" fill="#3A4658"/>
+  <rect x="280" y="330" width="170" height="16" fill="#3A4658"/>
+  <rect x="200" y="333" width="80" height="10" fill="#7FC4E8"/>
+  <text x="240" y="366" font-size="12" fill="#5B6778" text-anchor="middle">window</text>
+  <text x="240" y="400" font-size="13" fill="#5B6778" text-anchor="middle">room (inside)</text>
+
+  <!-- sun behind the wall -->
+  <g opacity="0.55"><use href="#sun" x="400" y="402"/></g>
+  <text x="372" y="440" font-size="12" fill="#5B6778" text-anchor="middle">✗ behind the wall</text>
+
+  <!-- ============ Right: over one day ============ -->
+  <line x1="490" y1="30" x2="490" y2="450" stroke="#E6EAF0"/>
+  <text x="520" y="40" font-size="20" font-weight="700" fill="#1E2A3B">2 · Over one day</text>
+  <text x="520" y="62" font-size="13" fill="#5B6778">The sun hits the window when both are true.</text>
+
+  <!-- 00–24 h on x 530…910: 15.83 px per hour -->
+  <g font-size="13" fill="#1E2A3B" font-weight="600">
+    <text x="530" y="104">Sun is up</text>
+    <text x="530" y="164">Sun within the window's angle range</text>
+    <text x="530" y="236">= Sun on the window</text>
+  </g>
+  <rect x="530" y="112" width="380" height="18" rx="9" fill="#EEF1F5"/>
+  <rect x="657" y="112" width="150" height="18" rx="9" fill="#BFD9EA"/>
+  <text x="732" y="126" font-size="11" fill="#1E2A3B" text-anchor="middle">08:02 – 17:31</text>
+
+  <rect x="530" y="172" width="380" height="18" rx="9" fill="#EEF1F5"/>
+  <rect x="604" y="172" width="143" height="18" rx="9" fill="#F9DDA6"/>
+  <text x="676" y="186" font-size="11" fill="#1E2A3B" text-anchor="middle">azimuth 67° – 197°</text>
+
+  <rect x="530" y="244" width="380" height="22" rx="11" fill="#EEF1F5"/>
+  <rect x="657" y="244" width="90" height="22" rx="11" fill="#F5B33F"/>
+  <text x="702" y="260" font-size="12" font-weight="700" fill="#1E2A3B" text-anchor="middle">5.7 h</text>
+  <text x="657" y="284" font-size="11" fill="#5B6778" text-anchor="middle">Sun start 08:02</text>
+  <text x="757" y="284" font-size="11" fill="#5B6778" text-anchor="start">Sun end 13:43</text>
+
+  <!-- hour axis -->
+  <g font-size="11" fill="#8792A2" text-anchor="middle">
+    <line x1="530" y1="304" x2="910" y2="304" stroke="#D8DEE6"/>
+    <text x="530" y="320">00</text><text x="625" y="320">06</text><text x="720" y="320">12</text>
+    <text x="815" y="320">18</text><text x="910" y="320">24</text>
+  </g>
+
+  <!-- now marker -->
+  <line x1="831" y1="96" x2="831" y2="304" stroke="#C0392B" stroke-width="1.5" stroke-dasharray="3 3"/>
+  <text x="835" y="92" font-size="11" font-weight="700" fill="#C0392B">now 19:00</text>
+
+  <g font-size="13" fill="#1E2A3B">
+    <text x="520" y="356">After the last sun of the day (13:43 here), the sensors switch</text>
+    <text x="520" y="376">to <tspan font-weight="700">tomorrow</tspan>, and back to <tspan font-weight="700">today</tspan> at midnight.</text>
+    <text x="520" y="410" fill="#5B6778">"Sun is up" uses the sunrise and sunset definition of the</text>
+    <text x="520" y="428" fill="#5B6778">Sun integration. Buildings, trees and balconies are ignored.</text>
+  </g>
+</svg>

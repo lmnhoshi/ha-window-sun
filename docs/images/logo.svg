@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 256 256">
+  <!-- Window Sun logo: a window seen from above, with the fan of sun angles that reach it -->
+  <path d="M128 200 L20 200 A108 108 0 0 1 236 200 Z" fill="#FBE3B0"/>
+  <path d="M128 200 L37 142 A108 108 0 0 1 219 142 Z" fill="#F8C766"/>
+  <line x1="128" y1="196" x2="94" y2="104" stroke="#F2A93B" stroke-width="7" stroke-linecap="round"/>
+  <g transform="translate(88 88)">
+    <circle r="27" fill="#F5A623"/>
+    <g stroke="#F5A623" stroke-width="8" stroke-linecap="round">
+      <line x1="0" y1="-38" x2="0" y2="-50"/><line x1="-38" y1="0" x2="-50" y2="0"/>
+      <line x1="27" y1="-27" x2="35" y2="-35"/><line x1="-27" y1="-27" x2="-35" y2="-35"/>
+      <line x1="38" y1="0" x2="50" y2="0"/>
+    </g>
+  </g>
+  <rect x="6" y="200" width="82" height="28" rx="7" fill="#3A4A60"/>
+  <rect x="168" y="200" width="82" height="28" rx="7" fill="#3A4A60"/>
+  <rect x="88" y="205" width="80" height="18" fill="#6BB8E4"/>
+</svg>

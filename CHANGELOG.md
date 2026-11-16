@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.2.1 – 2026-11-16
+
+- Logo, shown in Home Assistant and the Marketplace.
+- README: screenshot, calculation diagram, floor-plan label example.
+
 ## 0.2.0 – 2026-11-16
 
 - Each window has a minimum and a maximum sun angle from the wall (default 1°–179°,

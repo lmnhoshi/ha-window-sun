@@ -1,4 +1,8 @@
+<p align="center"><img src="docs/images/logo.svg" width="128" alt="Window Sun logo"></p>
+
 # Window Sun
+
+[![Open your Home Assistant instance and open this repository in HACS.](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=lmnhoshi&repository=ha-window-sun&category=integration)
 
 A Home Assistant integration that tells you how many hours of **direct sun** each
 window can get today. Once today's sun has left the window, it shows tomorrow's.
@@ -6,7 +10,14 @@ window can get today. Once today's sun has left the window, it shows tomorrow's.
 It uses your home location (Settings → System → General), the same one the Sun
 integration uses. It needs no cloud service, no extra library and no polling.
 
+![A floor plan in Home Assistant with a label under the living room window: "Tmrw 08:02–13:43 · 5.7 h"](docs/images/floorplan-label.png)
+
+*On a floor-plan dashboard: today's sun is over, so the label shows tomorrow's time slot and
+total. The [dashboard example](#a-label-on-a-floor-plan) shows how to build it.*
+
 ## What counts as "sun on the window"
+
+![Diagram. Left, seen from above: a wall with a window facing 132°, a half circle from 0° on the left to 180° on the right, a shaded range from 25° to 155°; a sun inside the range is on the window, one outside the range or behind the wall is not. Right, over one day: "sun is up" from 08:02 to 17:31 and "sun within the range" until 13:43 combine into 5.7 h of sun on the window.](docs/images/how-it-works.svg)
 
 The sun hits a window when both of these are true:
 
@@ -124,6 +135,52 @@ content: >
   {% endif %}
 ```
 
+### A label on a floor plan
+
+The screenshot at the top is a `picture-elements` floor plan. A template sensor builds the
+text, for example in a package:
+
+```yaml
+template:
+  - sensor:
+      - name: Living room window sun slot
+        state: >
+          {% set w = 'sensor.living_room_window_sun_' %}
+          {% set s = states(w ~ 'start') %}
+          {% set e = states(w ~ 'end') %}
+          {% set prefix = 'Tmrw ' if is_state(w ~ 'day', 'tomorrow') else '' %}
+          {% if as_timestamp(s, none) is none or as_timestamp(e, none) is none %}
+            {{ prefix }}No sun
+          {% else %}
+            {{ prefix }}{{ as_timestamp(s) | timestamp_custom('%H:%M') }}–{{ as_timestamp(e) | timestamp_custom('%H:%M') }} · {{ states(w ~ 'hours') | float(0) | round(1) }} h
+          {% endif %}
+```
+
+Two conditional elements then show it, gold while the sun is on the window and grey otherwise:
+
+```yaml
+- type: conditional
+  conditions:
+    - entity: binary_sensor.living_room_window_sun_on_window
+      state: "on"
+  elements:
+    - type: state-label
+      entity: sensor.living_room_window_sun_slot
+      prefix: "☀ "
+      style: { left: 57%, top: 90%, color: "#151B26", background: "#F2B84B",
+               padding: 2px 8px, border-radius: 10px, white-space: nowrap }
+- type: conditional
+  conditions:
+    - entity: binary_sensor.living_room_window_sun_on_window
+      state: "off"
+  elements:
+    - type: state-label
+      entity: sensor.living_room_window_sun_slot
+      prefix: "☀ "
+      style: { left: 57%, top: 90%, color: "#93A0AD", background: "rgba(21, 27, 38, 0.75)",
+               padding: 2px 8px, border-radius: 10px, white-space: nowrap }
+```
+
 ## How it is calculated
 
 For each local day (midnight to midnight, so a daylight-saving day lasts 23 or 25 h), the
@@ -135,8 +192,8 @@ Two days for one window take about 10 ms.
 
 ## Installation
 
-Use the Marketplace or HACS: add this repository as a custom repository of type *Integration*, then
-install **Window Sun**. Alternatively, copy `custom_components/window_sun` into your configuration's
+Use the Marketplace or HACS: use the button at the top, or add `https://github.com/lmnhoshi/ha-window-sun`
+as a custom repository of type *Integration*. Then install **Window Sun**. Alternatively, copy `custom_components/window_sun` into your configuration's
 `custom_components` folder. Then restart Home Assistant.
 
 ## Development

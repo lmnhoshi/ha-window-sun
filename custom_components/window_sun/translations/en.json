@@ -1,0 +1,61 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Add a window",
+        "description": "Sun hours are calculated from your home location (Settings → System → General), the same one the Sun integration uses. Obstacles such as buildings, trees or balconies are not taken into account.",
+        "data": {
+          "name": "Name",
+          "azimuth": "Orientation",
+          "floor": "Floor",
+          "ground_floor": "Ground floor number"
+        },
+        "data_description": {
+          "name": "For example Living room window. Entities are named after it.",
+          "azimuth": "Compass direction the window faces, looking out: 0 north, 90 east, 180 south, 270 west.",
+          "floor": "Floor the window is on, numbered the local way.",
+          "ground_floor": "How floors are numbered where you live."
+        }
+      }
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Window settings",
+        "data": {
+          "azimuth": "Orientation",
+          "floor": "Floor",
+          "ground_floor": "Ground floor number"
+        },
+        "data_description": {
+          "azimuth": "Compass direction the window faces, looking out: 0 north, 90 east, 180 south, 270 west.",
+          "floor": "Floor the window is on, numbered the local way.",
+          "ground_floor": "How floors are numbered where you live."
+        }
+      }
+    }
+  },
+  "selector": {
+    "ground_floor": {
+      "options": {
+        "0": "Ground floor is 0 (most of Europe)",
+        "1": "Ground floor is 1 (North America and others)"
+      }
+    }
+  },
+  "entity": {
+    "binary_sensor": {
+      "in_sun": { "name": "Sun on window" }
+    },
+    "sensor": {
+      "sun_hours": { "name": "Sun hours" },
+      "sun_start": { "name": "Sun start" },
+      "sun_end": { "name": "Sun end" },
+      "day": {
+        "name": "Sun day",
+        "state": { "today": "Today", "tomorrow": "Tomorrow" }
+      }
+    }
+  }
+}

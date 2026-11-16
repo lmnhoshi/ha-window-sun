@@ -1,0 +1,12 @@
+{
+  "domain": "window_sun",
+  "name": "Window Sun",
+  "codeowners": ["@lmnhoshi"],
+  "config_flow": true,
+  "documentation": "https://github.com/lmnhoshi/ha-window-sun",
+  "integration_type": "service",
+  "iot_class": "calculated",
+  "issue_tracker": "https://github.com/lmnhoshi/ha-window-sun/issues",
+  "requirements": [],
+  "version": "0.1.0"
+}

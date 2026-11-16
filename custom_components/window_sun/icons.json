@@ -1,0 +1,19 @@
+{
+  "entity": {
+    "binary_sensor": {
+      "in_sun": {
+        "default": "mdi:window-closed-variant",
+        "state": { "on": "mdi:sun-angle" }
+      }
+    },
+    "sensor": {
+      "sun_hours": { "default": "mdi:sun-clock" },
+      "sun_start": { "default": "mdi:weather-sunset-up" },
+      "sun_end": { "default": "mdi:weather-sunset-down" },
+      "day": {
+        "default": "mdi:calendar-today",
+        "state": { "tomorrow": "mdi:calendar-arrow-right" }
+      }
+    }
+  }
+}
